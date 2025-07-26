@@ -1,7 +1,8 @@
 local mouseMode = false
 local accel = 1
 local accelTimer = nil
-local baseMove = 5
+local baseMove = 8
+local fastMove = 25
 local accelStep = 1
 local accelMax = 6
 local currentDirection = nil
@@ -35,6 +36,18 @@ hs.hotkey.bind({ "cmd", "alt", "ctrl", "shift" }, "A", function()
                 function() startMoving(0, 1) end),
             hs.hotkey.bind({}, "up", function() startMoving(0, -1) end, function() stopMoving() end,
                 function() startMoving(0, -1) end),
+            hs.hotkey.bind({ "shift" }, "left", function() startMovingFast(-1, 0) end, function() stopMoving() end,
+                function() startMovingFast(-1, 0) end),
+            hs.hotkey.bind({ "shift" }, "right", function() startMovingFast(1, 0) end, function() stopMoving() end,
+                function() startMovingFast(1, 0) end),
+            hs.hotkey.bind({ "shift" }, "down", function() startMovingFast(0, 1) end, function() stopMoving() end,
+                function() startMovingFast(0, 1) end),
+            hs.hotkey.bind({ "shift" }, "up", function() startMovingFast(0, -1) end, function() stopMoving() end,
+                function() startMovingFast(0, -1) end),
+            hs.hotkey.bind({ "cmd" }, "left", function() moveToScreenEdge("left") end),
+            hs.hotkey.bind({ "cmd" }, "right", function() moveToScreenEdge("right") end),
+            hs.hotkey.bind({ "cmd" }, "down", function() moveToScreenEdge("down") end),
+            hs.hotkey.bind({ "cmd" }, "up", function() moveToScreenEdge("up") end),
             hs.hotkey.bind({ "alt" }, "left", function() startScrolling(-1, 0) end, function() stopScrolling() end,
                 function() startScrolling(-1, 0) end),
             hs.hotkey.bind({ "alt" }, "right", function() startScrolling(1, 0) end, function() stopScrolling() end,
@@ -287,4 +300,70 @@ function completeScreenshotSelection()
 
     screenshotMode = false
     startPos = nil
+end
+
+-- Edge movement functions
+function moveToScreenEdge(direction)
+    local screen = hs.screen.mainScreen()
+    local frame = screen:fullFrame()
+    local currentPos = hs.mouse.absolutePosition()
+    local newPos = { x = currentPos.x, y = currentPos.y }
+
+    if direction == "left" then
+        newPos.x = frame.x
+    elseif direction == "right" then
+        newPos.x = frame.x + frame.w - 1
+    elseif direction == "up" then
+        newPos.y = frame.y
+    elseif direction == "down" then
+        newPos.y = frame.y + frame.h - 1
+    end
+
+    hs.mouse.absolutePosition(newPos)
+end
+
+-- Fast movement control functions
+function startMovingFast(dx, dy)
+    -- If direction changed, reset acceleration
+    if currentDirection and (currentDirection.dx ~= dx or currentDirection.dy ~= dy) then
+        accel = 1
+    end
+
+    currentDirection = { dx = dx, dy = dy }
+
+    -- Stop any existing movement timer
+    if moveTimer then
+        moveTimer:stop()
+    end
+
+    -- Immediate fast movement
+    moveMouseFast(dx, dy)
+
+    -- Start continuous fast movement
+    moveTimer = hs.timer.doEvery(0.03, function()
+        if currentDirection then
+            moveMouseFast(currentDirection.dx, currentDirection.dy)
+        end
+    end)
+end
+
+-- Fast mouse movement logic
+function moveMouseFast(dx, dy)
+    local pos = hs.mouse.absolutePosition()
+    pos.x = pos.x + dx * accel * fastMove
+    pos.y = pos.y + dy * accel * fastMove
+    hs.mouse.absolutePosition(pos)
+
+    -- If left click is held, send drag events during movement
+    if isLeftClickHeld then
+        local dragEvent = hs.eventtap.event.newMouseEvent(hs.eventtap.event.types.leftMouseDragged, pos)
+        dragEvent:post()
+    end
+
+    accel = math.min(accel + accelStep, accelMax)
+
+    if accelTimer then accelTimer:stop() end
+    accelTimer = hs.timer.doAfter(0.3, function()
+        accel = 1
+    end)
 end
