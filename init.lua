@@ -1,7 +1,7 @@
 local mouseMode = false
 local accel = 1
 local accelTimer = nil
-local baseMove = 8
+local baseMove = 5
 local fastMove = 25
 local accelStep = 1
 local accelMax = 6
@@ -36,6 +36,15 @@ hs.hotkey.bind({ "cmd", "alt", "ctrl", "shift" }, "A", function()
                 function() startMoving(0, 1) end),
             hs.hotkey.bind({}, "up", function() startMoving(0, -1) end, function() stopMoving() end,
                 function() startMoving(0, -1) end),
+            -- jkl; as alternative arrow keys
+            hs.hotkey.bind({}, "j", function() startMoving(-1, 0) end, function() stopMoving() end,
+                function() startMoving(-1, 0) end),
+            hs.hotkey.bind({}, ";", function() startMoving(1, 0) end, function() stopMoving() end,
+                function() startMoving(1, 0) end),
+            hs.hotkey.bind({}, "k", function() startMoving(0, 1) end, function() stopMoving() end,
+                function() startMoving(0, 1) end),
+            hs.hotkey.bind({}, "l", function() startMoving(0, -1) end, function() stopMoving() end,
+                function() startMoving(0, -1) end),
             hs.hotkey.bind({ "shift" }, "left", function() startMovingFast(-1, 0) end, function() stopMoving() end,
                 function() startMovingFast(-1, 0) end),
             hs.hotkey.bind({ "shift" }, "right", function() startMovingFast(1, 0) end, function() stopMoving() end,
@@ -44,10 +53,24 @@ hs.hotkey.bind({ "cmd", "alt", "ctrl", "shift" }, "A", function()
                 function() startMovingFast(0, 1) end),
             hs.hotkey.bind({ "shift" }, "up", function() startMovingFast(0, -1) end, function() stopMoving() end,
                 function() startMovingFast(0, -1) end),
+            -- jkl; with shift for fast movement
+            hs.hotkey.bind({ "shift" }, "j", function() startMovingFast(-1, 0) end, function() stopMoving() end,
+                function() startMovingFast(-1, 0) end),
+            hs.hotkey.bind({ "shift" }, ";", function() startMovingFast(1, 0) end, function() stopMoving() end,
+                function() startMovingFast(1, 0) end),
+            hs.hotkey.bind({ "shift" }, "k", function() startMovingFast(0, 1) end, function() stopMoving() end,
+                function() startMovingFast(0, 1) end),
+            hs.hotkey.bind({ "shift" }, "l", function() startMovingFast(0, -1) end, function() stopMoving() end,
+                function() startMovingFast(0, -1) end),
             hs.hotkey.bind({ "cmd" }, "left", function() moveToScreenEdge("left") end),
             hs.hotkey.bind({ "cmd" }, "right", function() moveToScreenEdge("right") end),
             hs.hotkey.bind({ "cmd" }, "down", function() moveToScreenEdge("down") end),
             hs.hotkey.bind({ "cmd" }, "up", function() moveToScreenEdge("up") end),
+            -- jkl; with cmd for screen edge movement
+            hs.hotkey.bind({ "cmd" }, "j", function() moveToScreenEdge("left") end),
+            hs.hotkey.bind({ "cmd" }, ";", function() moveToScreenEdge("right") end),
+            hs.hotkey.bind({ "cmd" }, "k", function() moveToScreenEdge("down") end),
+            hs.hotkey.bind({ "cmd" }, "l", function() moveToScreenEdge("up") end),
             hs.hotkey.bind({ "alt" }, "left", function() startScrolling(-1, 0) end, function() stopScrolling() end,
                 function() startScrolling(-1, 0) end),
             hs.hotkey.bind({ "alt" }, "right", function() startScrolling(1, 0) end, function() stopScrolling() end,
@@ -55,6 +78,15 @@ hs.hotkey.bind({ "cmd", "alt", "ctrl", "shift" }, "A", function()
             hs.hotkey.bind({ "alt" }, "down", function() startScrolling(0, -1) end, function() stopScrolling() end,
                 function() startScrolling(0, -1) end),
             hs.hotkey.bind({ "alt" }, "up", function() startScrolling(0, 1) end, function() stopScrolling() end,
+                function() startScrolling(0, 1) end),
+            -- jkl; with alt for scrolling
+            hs.hotkey.bind({ "alt" }, "j", function() startScrolling(-1, 0) end, function() stopScrolling() end,
+                function() startScrolling(-1, 0) end),
+            hs.hotkey.bind({ "alt" }, ";", function() startScrolling(1, 0) end, function() stopScrolling() end,
+                function() startScrolling(1, 0) end),
+            hs.hotkey.bind({ "alt" }, "k", function() startScrolling(0, -1) end, function() stopScrolling() end,
+                function() startScrolling(0, -1) end),
+            hs.hotkey.bind({ "alt" }, "l", function() startScrolling(0, 1) end, function() stopScrolling() end,
                 function() startScrolling(0, 1) end),
             hs.hotkey.bind({}, "return", function()
                 if screenshotMode then
