@@ -8,18 +8,31 @@ local accelMax = 6
 local currentDirection = nil
 local moveTimer = nil
 local scrollAccel = 1
-local scrollTimer = nil
-local currentScrollDirection = nil
-local scrollDirection = nil
-local scrollTimer = nil
-local scrollAccel = 5
 local scrollAccelTimer = nil
+local currentScrollDirection = nil
 local baseScroll = 4
-local scroll
+local scrollTimer = nil
 local isLeftClickHeld = false
 
 -- Hotkeys for when mouse mode is active
 local mouseHotkeys = {}
+
+-- Global hotkeys for cmd+jkl; as arrow keys
+hs.hotkey.bind({ "cmd" }, "j", function()
+    hs.eventtap.keyStroke({}, "left")
+end)
+
+hs.hotkey.bind({ "cmd" }, "k", function()
+    hs.eventtap.keyStroke({}, "down")
+end)
+
+hs.hotkey.bind({ "cmd" }, "l", function()
+    hs.eventtap.keyStroke({}, "up")
+end)
+
+hs.hotkey.bind({ "cmd" }, ";", function()
+    hs.eventtap.keyStroke({}, "right")
+end)
 
 -- Toggle mouse mode with hyper+A
 hs.hotkey.bind({ "cmd", "alt", "ctrl", "shift" }, "A", function()
@@ -71,19 +84,19 @@ hs.hotkey.bind({ "cmd", "alt", "ctrl", "shift" }, "A", function()
             hs.hotkey.bind({ "cmd" }, ";", function() moveToScreenEdge("right") end),
             hs.hotkey.bind({ "cmd" }, "k", function() moveToScreenEdge("down") end),
             hs.hotkey.bind({ "cmd" }, "l", function() moveToScreenEdge("up") end),
-            hs.hotkey.bind({ "alt" }, "left", function() startScrolling(-1, 0) end, function() stopScrolling() end,
-                function() startScrolling(-1, 0) end),
-            hs.hotkey.bind({ "alt" }, "right", function() startScrolling(1, 0) end, function() stopScrolling() end,
+            hs.hotkey.bind({ "alt" }, "left", function() startScrolling(1, 0) end, function() stopScrolling() end,
                 function() startScrolling(1, 0) end),
+            hs.hotkey.bind({ "alt" }, "right", function() startScrolling(-1, 0) end, function() stopScrolling() end,
+                function() startScrolling(-1, 0) end),
             hs.hotkey.bind({ "alt" }, "down", function() startScrolling(0, -1) end, function() stopScrolling() end,
                 function() startScrolling(0, -1) end),
             hs.hotkey.bind({ "alt" }, "up", function() startScrolling(0, 1) end, function() stopScrolling() end,
                 function() startScrolling(0, 1) end),
             -- jkl; with alt for scrolling
-            hs.hotkey.bind({ "alt" }, "j", function() startScrolling(-1, 0) end, function() stopScrolling() end,
-                function() startScrolling(-1, 0) end),
-            hs.hotkey.bind({ "alt" }, ";", function() startScrolling(1, 0) end, function() stopScrolling() end,
+            hs.hotkey.bind({ "alt" }, "j", function() startScrolling(1, 0) end, function() stopScrolling() end,
                 function() startScrolling(1, 0) end),
+            hs.hotkey.bind({ "alt" }, ";", function() startScrolling(-1, 0) end, function() stopScrolling() end,
+                function() startScrolling(-1, 0) end),
             hs.hotkey.bind({ "alt" }, "k", function() startScrolling(0, -1) end, function() stopScrolling() end,
                 function() startScrolling(0, -1) end),
             hs.hotkey.bind({ "alt" }, "l", function() startScrolling(0, 1) end, function() stopScrolling() end,
@@ -150,6 +163,10 @@ function disableMouseMode()
     if scrollTimer then
         scrollTimer:stop()
         scrollTimer = nil
+    end
+    if scrollAccelTimer then
+        scrollAccelTimer:stop()
+        scrollAccelTimer = nil
     end
 end
 
@@ -234,12 +251,12 @@ function startScrolling(dx, dy)
     end
 
     -- Immediate scroll
-    scroll(dx, dy)
+    performScroll(dx, dy)
 
     -- Start continuous scrolling
     scrollTimer = hs.timer.doEvery(0.05, function()
         if currentScrollDirection then
-            scroll(currentScrollDirection.dx, currentScrollDirection.dy)
+            performScroll(currentScrollDirection.dx, currentScrollDirection.dy)
         end
     end)
 end
@@ -253,12 +270,23 @@ function stopScrolling()
     scrollAccel = 1
 end
 
--- Scroll function
-function scroll(dx, dy)
-    local baseScroll = 15
-    hs.eventtap.scrollWheel({ dx * scrollAccel * baseScroll, dy * scrollAccel * baseScroll }, {}, "pixel")
+-- Scroll function - fixed to properly handle horizontal and vertical scrolling
+function performScroll(dx, dy)
+    -- For horizontal scrolling, we need to use the first parameter
+    -- For vertical scrolling, we use the second parameter
+    local scrollX = dx * scrollAccel * baseScroll
+    local scrollY = dy * scrollAccel * baseScroll
+
+    -- Hammerspoon's scrollWheel expects {horizontal, vertical} format
+    hs.eventtap.scrollWheel({ scrollX, scrollY }, {}, "pixel")
 
     scrollAccel = math.min(scrollAccel + 1, 10)
+
+    -- Reset acceleration after period of inactivity
+    if scrollAccelTimer then scrollAccelTimer:stop() end
+    scrollAccelTimer = hs.timer.doAfter(0.3, function()
+        scrollAccel = 1
+    end)
 end
 
 -- Left click hold functions
