@@ -34,6 +34,16 @@ hs.hotkey.bind({ "cmd" }, ";", function()
     hs.eventtap.keyStroke({}, "right")
 end)
 
+-- Global hotkey for double-click with cmd+option+enter
+hs.hotkey.bind({ "cmd", "option" }, "return", function()
+    local pos = hs.mouse.absolutePosition()
+    -- Perform double-click
+    hs.eventtap.leftClick(pos)
+    hs.timer.doAfter(0.05, function()
+        hs.eventtap.leftClick(pos)
+    end)
+end)
+
 -- Toggle mouse mode with hyper+A
 hs.hotkey.bind({ "cmd", "alt", "ctrl", "shift" }, "A", function()
     mouseMode = not mouseMode
