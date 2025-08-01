@@ -17,23 +17,6 @@ local isLeftClickHeld = false
 -- Hotkeys for when mouse mode is active
 local mouseHotkeys = {}
 
--- Global hotkeys for cmd+jkl; as arrow keys
-hs.hotkey.bind({ "cmd" }, "j", function()
-    hs.eventtap.keyStroke({}, "left")
-end)
-
-hs.hotkey.bind({ "cmd" }, "k", function()
-    hs.eventtap.keyStroke({}, "down")
-end)
-
-hs.hotkey.bind({ "cmd" }, "l", function()
-    hs.eventtap.keyStroke({}, "up")
-end)
-
-hs.hotkey.bind({ "cmd" }, ";", function()
-    hs.eventtap.keyStroke({}, "right")
-end)
-
 -- Global hotkey for double-click with cmd+option+enter
 hs.hotkey.bind({ "cmd", "option" }, "return", function()
     local pos = hs.mouse.absolutePosition()
